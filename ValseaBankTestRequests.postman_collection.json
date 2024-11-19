@@ -1,0 +1,156 @@
+{
+	"info": {
+		"_postman_id": "7f9ec8ac-f316-4d13-9572-5f743f399998",
+		"name": "ValseaBankTestRequests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39846618"
+	},
+	"item": [
+		{
+			"name": "CreateAccount",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"owner\": \"Eduardo Camara\",\n  \"initial_balance\": 100.0\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/accounts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"accounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAccountInfo",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/accounts/b45cdfdc-06db-403e-9491-545e5af79ce1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"accounts",
+						"b45cdfdc-06db-403e-9491-545e5af79ce1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAllAccounts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/accounts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"accounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PerformTransaction",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"type\": \"withdrawal\",\n  \"amount\": 1500.0\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/accounts/b45cdfdc-06db-403e-9491-545e5af79ce1/transactions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"accounts",
+						"b45cdfdc-06db-403e-9491-545e5af79ce1",
+						"transactions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetTransactionsByAccountID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/accounts/b45cdfdc-06db-403e-9491-545e5af79ce1/transactions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"accounts",
+						"b45cdfdc-06db-403e-9491-545e5af79ce1",
+						"transactions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TransferBetweenAccounts",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"from_account_id\": \"b45cdfdc-06db-403e-9491-545e5af79ce1\",\n  \"to_account_id\": \"a927eb21-5652-402c-b80c-80daca1a4fd3\",\n  \"amount\": 200.0\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/transfer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"transfer"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
