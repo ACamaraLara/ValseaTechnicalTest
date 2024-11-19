@@ -65,6 +65,10 @@ func (am *AccountManager) TransferBetweenAccounts(fromAccountID, toAccountID str
 		return bank.ErrZeroTransactionAmount
 	}
 
+	if fromAccountID == toAccountID {
+		return bank.ErrSameSourceDestination
+	}
+
 	am.mu.Lock()
 	defer am.mu.Unlock()
 
@@ -82,8 +86,8 @@ func (am *AccountManager) TransferBetweenAccounts(fromAccountID, toAccountID str
 		return bank.InsufficientFundsError(fromAccountID, fromAccount.Balance, amount)
 	}
 
-	fromAccount.Balance -= amount
-	toAccount.Balance += amount
+	fromAccount.Withdraw(amount)
+	toAccount.Deposit(amount)
 
 	am.Accounts[fromAccountID] = fromAccount
 	am.Accounts[toAccountID] = toAccount

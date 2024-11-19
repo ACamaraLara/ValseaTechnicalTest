@@ -7,10 +7,9 @@ import (
 
 var (
 	// Account errors.
-	ErrAccountNotFound              = errors.New("account not found")
-	ErrEmptyOwnerName               = errors.New("owner name cannot be empty")
-	ErrSameSourceDestinationAccount = errors.New("source and destination account cannot be the same")
-	ErrNoTransactionsForAccount     = errors.New("no transactions found in provided account")
+	ErrAccountNotFound          = errors.New("account not found")
+	ErrEmptyOwnerName           = errors.New("owner name cannot be empty")
+	ErrNoTransactionsForAccount = errors.New("no transactions found in provided account")
 
 	// Transaction errors.
 	ErrTransactionNotFound     = errors.New("transaction not found")
@@ -26,6 +25,7 @@ var (
 	// Transfer errors
 	ErrTransferSourceNotFound      = errors.New("transfer account source not found")
 	ErrTransferDestinationNotFound = errors.New("transfer account source not found")
+	ErrSameSourceDestination       = errors.New("source and destination cannot be the same")
 )
 
 // Helper functions for error wrapping.
@@ -40,7 +40,7 @@ func EmptyOwnerNameError() error {
 }
 
 func SameSourceDestinationAccountError(accountID string) error {
-	return fmt.Errorf("%w: account ID %s", ErrSameSourceDestinationAccount, accountID)
+	return fmt.Errorf("%w: account ID %s", ErrSameSourceDestination, accountID)
 }
 
 func NoTransactionsForAccountError(accountID string) error {
