@@ -35,10 +35,6 @@ func AccountNotFoundError(accountID string) error {
 	return fmt.Errorf("%w: account ID %s", ErrAccountNotFound, accountID)
 }
 
-func EmptyOwnerNameError() error {
-	return fmt.Errorf("%w", ErrEmptyOwnerName)
-}
-
 func NoTransactionsForAccountError(accountID string) error {
 	return fmt.Errorf("%w: account ID %s", ErrNoTransactionsForAccount, accountID)
 }
@@ -50,14 +46,6 @@ func TransactionNotFoundError(transactionID string) error {
 
 func InvalidTransactionError(transactionType string) error {
 	return fmt.Errorf("%w: transaction type %s", ErrInvalidTransaction, transactionType)
-}
-
-func TransactionTypeRequiredError() error {
-	return fmt.Errorf("%w", ErrTransactionTypeRequired)
-}
-
-func ZeroTransactionAmountError() error {
-	return fmt.Errorf("%w", ErrZeroTransactionAmount)
 }
 
 // Balance errors.

@@ -14,13 +14,6 @@ type TransactionManager struct {
 }
 
 func (tm *TransactionManager) CreateTransaction(accountID, transactionType string, amount float64) (*bank.Transaction, error) {
-	if transactionType != bank.DepositTransactionType && transactionType != bank.WithdrawalTransactionType {
-		return &bank.Transaction{}, bank.InvalidTransactionError(transactionType)
-	}
-	if amount <= 0 {
-		return &bank.Transaction{}, bank.ErrZeroTransactionAmount
-	}
-
 	// Create the transaction
 	transaction := bank.Transaction{
 		ID:        uuid.New().String(),
