@@ -10,11 +10,11 @@ type BankStore struct {
 func NewBankStore() *BankStore {
 	// Initialize the AccountManager and TransactionManager
 	accManager := &AccountManager{
-		Accounts: make(map[string]bank.Account), // Initialize the map to hold accounts
+		Accounts: make(map[string]bank.Account),
 	}
 
 	transactManager := &TransactionManager{
-		Transactions: make(map[string][]bank.Transaction), // Initialize the map to hold transactions
+		Transactions: make(map[string][]bank.Transaction),
 	}
 
 	// Create and return the BankStore with both managers

@@ -1,11 +1,10 @@
 package restServer
 
 import (
-	"bank-demo-app/internal/bank/memoryBank"
 	"net/http"
 )
 
-func InitRestRoutes(bankStore *memoryBank.BankStore) Routes {
+func InitRestRoutes(bankStore BankStore) Routes {
 	serverRoutes := Routes{
 		// Route to get if server is up.
 		{
