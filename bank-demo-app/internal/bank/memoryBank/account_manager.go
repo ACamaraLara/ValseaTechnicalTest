@@ -14,24 +14,16 @@ type AccountManager struct {
 }
 
 func (am *AccountManager) CreateAccount(owner string, initialBalance float64) (*bank.Account, error) {
-	if owner == "" {
-		return &bank.Account{}, bank.ErrEmptyOwnerName
-	}
-	if initialBalance < 0 {
-		return &bank.Account{}, bank.ErrNegativeInitialBalance
-	}
-
 	// Assuming that there could be different accounts for a same owner name but with different IDs,
 	// no need to check if account owner exists.
-	accountID := uuid.New().String()
 	account := bank.Account{
-		ID:      accountID,
+		ID:      uuid.New().String(),
 		Owner:   owner,
 		Balance: initialBalance,
 	}
 
 	am.mu.Lock()
-	am.Accounts[accountID] = account
+	am.Accounts[account.ID] = account
 	am.mu.Unlock()
 
 	return &account, nil
@@ -61,14 +53,6 @@ func (am *AccountManager) ListAccounts() []bank.Account {
 }
 
 func (am *AccountManager) TransferBetweenAccounts(fromAccountID, toAccountID string, amount float64) error {
-	if amount <= 0 {
-		return bank.ErrZeroTransactionAmount
-	}
-
-	if fromAccountID == toAccountID {
-		return bank.ErrSameSourceDestination
-	}
-
 	am.mu.Lock()
 	defer am.mu.Unlock()
 
@@ -82,11 +66,10 @@ func (am *AccountManager) TransferBetweenAccounts(fromAccountID, toAccountID str
 		return bank.TransferDestinationNotFoundError(toAccountID)
 	}
 
-	if fromAccount.Balance < amount {
-		return bank.InsufficientFundsError(fromAccountID, fromAccount.Balance, amount)
+	// Withdraw from one account and deposit into the other one.
+	if err := fromAccount.Withdraw(amount); err != nil {
+		return err
 	}
-
-	fromAccount.Withdraw(amount)
 	toAccount.Deposit(amount)
 
 	am.Accounts[fromAccountID] = fromAccount
@@ -96,21 +79,11 @@ func (am *AccountManager) TransferBetweenAccounts(fromAccountID, toAccountID str
 }
 
 func (am *AccountManager) PerformTransaction(account *bank.Account, transactionType string, amount float64) error {
-	if amount <= 0 {
-		return bank.ErrZeroTransactionAmount
-	}
-
 	am.mu.Lock()
 	defer am.mu.Unlock()
 
-	if transactionType == bank.DepositTransactionType {
-		account.Deposit(amount)
-	} else if transactionType == bank.WithdrawalTransactionType {
-		if err := account.Withdraw(amount); err != nil {
-			return err
-		}
-	} else {
-		return bank.InvalidTransactionError(transactionType)
+	if err := account.UpdateBalance(transactionType, amount); err != nil {
+		return err
 	}
 	am.Accounts[account.ID] = *account
 	return nil

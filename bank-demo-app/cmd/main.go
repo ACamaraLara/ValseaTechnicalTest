@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bank-demo-app/internal/bank/dbBank"
 	"bank-demo-app/internal/bank/memoryBank"
+	"bank-demo-app/internal/inputParams"
 	"bank-demo-app/internal/restServer"
 	"context"
 	"net/http"
@@ -14,43 +16,86 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	serverPort      = ":8080"
+	shutdownTimeout = 5 * time.Second
+)
+
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel() // This will allow us to cancel the context on app
+
 	// Inits logger global instance to use it all around the project with same timestamp.
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	log.Logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
 
-	bankStore := memoryBank.NewBankStore()
-	bankRoutes := restServer.InitRestRoutes(bankStore)
+	config, err := inputParams.ParseInputParams()
+	if err != nil {
+		log.Error().Err(err).Msg("Finishing application")
+		return
+	}
 
-	// Create a new HTTP router and set up routes
-	router := restServer.NewRouter(bankRoutes)
+	// Initialize BankStore type.
+	bankStore := initBankStore(ctx, config)
 
+	if err := startServer(ctx, bankStore); err != nil {
+		log.Fatal().Err(err).Msg("Application terminated with error")
+	}
+}
+
+/// BootStrap helper functions would be moved to different package, but not needed for this technical test.
+
+// initBankStore initializes the appropriate BankStore based on configuration.
+func initBankStore(ctx context.Context, config *inputParams.AppConfig) restServer.BankStore {
+	if config.InMemory {
+		return memoryBank.NewBankStore()
+	}
+	return dbBank.NewBankStore(ctx, &config.MongoConf)
+}
+
+// startServer starts the HTTP server and handles graceful shutdown.
+func startServer(ctx context.Context, bankStore restServer.BankStore) error {
+	router := restServer.NewRouter(restServer.InitRestRoutes(bankStore))
 	server := &http.Server{
-		Addr:    ":8080", // Typical test port for REST servers.
+		Addr:    serverPort,
 		Handler: router,
 	}
+
+	// Run server in a goroutine
 	go func() {
-		log.Info().Msg("Starting server on port 8080...")
+		log.Info().Msgf("Server listening on port %s...", serverPort)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal().Err(err).Msg("Server failed")
 		}
 	}()
 
-	// Correct shutdown handling
+	// Wait for termination signal
+	signalCtx := handleSignals()
+	<-signalCtx.Done()
+
+	// Shutdown server gracefully
+	log.Info().Msg("Shutting down server...")
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, shutdownTimeout)
+	defer cancel()
+
+	if err := server.Shutdown(ctxWithTimeout); err != nil {
+		log.Error().Err(err).Msg("Error during server shutdown")
+		return err
+	}
+
+	log.Info().Msg("Server stopped gracefully")
+	return nil
+}
+
+// handleSignals listens for termination signals and returns a cancellable context.
+func handleSignals() context.Context {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
-	<-stop // Block until a termination signal is received
-	log.Info().Msg("Shutting down server...")
-
-	// Maximum of 5 secconds to let the server finish correctly.
-	timeout := 5 * time.Second
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
-	if err := server.Shutdown(ctx); err != nil {
-		log.Error().Err(err).Msg("Error during server shutdown")
-	} else {
-		log.Info().Msg("Server correctly stopped")
-	}
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		<-stop
+		cancel()
+	}()
+	return ctx
 }

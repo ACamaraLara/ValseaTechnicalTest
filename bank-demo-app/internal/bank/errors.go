@@ -39,10 +39,6 @@ func EmptyOwnerNameError() error {
 	return fmt.Errorf("%w", ErrEmptyOwnerName)
 }
 
-func SameSourceDestinationAccountError(accountID string) error {
-	return fmt.Errorf("%w: account ID %s", ErrSameSourceDestination, accountID)
-}
-
 func NoTransactionsForAccountError(accountID string) error {
 	return fmt.Errorf("%w: account ID %s", ErrNoTransactionsForAccount, accountID)
 }
@@ -84,4 +80,8 @@ func TransferSourceNotFoundError(accountID string) error {
 
 func TransferDestinationNotFoundError(accountID string) error {
 	return fmt.Errorf("%w: account ID %s", ErrTransferDestinationNotFound, accountID)
+}
+
+func SameSourceDestinationAccountError(accountID string) error {
+	return fmt.Errorf("%w: account ID %s", ErrSameSourceDestination, accountID)
 }

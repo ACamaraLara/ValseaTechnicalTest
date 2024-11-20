@@ -28,6 +28,19 @@ func (acc *Account) Withdraw(amount float64) error {
 	return nil
 }
 
+func (acc *Account) UpdateBalance(txType string, amount float64) error {
+	if txType == DepositTransactionType {
+		acc.Deposit(amount)
+	} else if txType == WithdrawalTransactionType {
+		if err := acc.Withdraw(amount); err != nil {
+			return err
+		}
+	} else {
+		return InvalidTransactionError(txType)
+	}
+	return nil
+}
+
 // Transaction represents a financial transaction associated with an account.
 type Transaction struct {
 	ID        string    `json:"id" bson:"_id"`

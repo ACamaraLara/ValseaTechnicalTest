@@ -46,6 +46,12 @@ func createAccountHandler(bankStore BankStore) gin.HandlerFunc {
 			return
 		}
 
+		if err := bank.ValidateAccountInput(request.Owner, request.InitialBalance); err != nil {
+			log.Error().Err(err).Msg("Failed validationg account.")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
 		log.Info().Str("owner", request.Owner).Float64("initial_balance", request.InitialBalance).Msg("Creating account")
 
 		account, err := bankStore.CreateAccount(request.Owner, request.InitialBalance)
@@ -100,6 +106,12 @@ func performTransactionHandler(bankStore BankStore) gin.HandlerFunc {
 			return
 		}
 
+		if err := bank.ValidateTransaction(request.Type, request.Amount); err != nil {
+			log.Error().Err(err).Msg("Failed validationg account.")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
 		log.Info().Str("account_id", accountID).Str("transaction_type", request.Type).Float64("amount", request.Amount).Msg("Creating transaction")
 
 		transaction, err := bankStore.PerformTransaction(accountID, request.Type, request.Amount)
@@ -123,7 +135,7 @@ func getTransactionsByAccountIDHandler(bankStore BankStore) gin.HandlerFunc {
 		transactions, err := bankStore.GetTransactionsByAccountID(accountID)
 		if err != nil {
 			log.Error().Err(err).Str("account_id", accountID).Msg("Transactions not found")
-			c.JSON(http.StatusNotFound, gin.H{"error": err})
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -138,6 +150,11 @@ func transferFundsHandler(bankStore BankStore) gin.HandlerFunc {
 		if err := c.ShouldBindJSON(&request); err != nil {
 			log.Error().Err(err).Msg("Invalid request body for transfer")
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
+		}
+		if err := bank.ValidateTransfer(request.FromAccountID, request.ToAccountID, request.Amount); err != nil {
+			log.Error().Err(err).Msg("Transfer validation failed.")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
